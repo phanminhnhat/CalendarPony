@@ -216,17 +216,17 @@
             { time: '09:30', duration: 15, title: 'Nghỉ ngơi', icon: '💧', description: 'Uống nước, thư giãn, chuẩn bị cho giờ học.' },
             { time: '09:45', duration: 120, title: 'Học Robotics', icon: '🤖', description: 'Làm bài tập lập trình, lắp ráp mô hình, hoặc học lý thuyết.', link: 'https://phanminhnhat.github.io/AIRobotics4Juniors' },
             { time: '11:45', duration: 45, title: 'Ăn trưa', icon: '🍱', description: 'Cơm, thịt/cá, rau, trái cây để bổ sung năng lượng.' },
-            { time: '12:30', duration: 30, title: 'Nghỉ trưa', icon: '😴', description: 'Đọc sách khoa học, truyện ngắn để thư giãn.' },
-            { time: '13:00', duration: 90, title: 'Học Anh văn', icon: '🇬🇧', description: 'Luyện nghe, nói, đọc, viết. Sử dụng Duolingo, BBC Learning English.' },
-            { time: '14:30', duration: 15, title: 'Nghỉ ngơi', icon: '🧘', description: 'Vận động nhẹ, giải lao giữa giờ.' },
-            { time: '14:45', duration: 90, title: 'Học Toán', icon: '📐', description: 'Giải bài tập, học lý thuyết, hoặc chơi game toán học.' },
-            { time: '16:15', duration: 45, title: 'Dự án cá nhân / Sáng tạo', icon: '💡', description: 'Vẽ, nặn đất sét, viết truyện ngắn, hoặc làm một dự án khoa học nhỏ.' },
-            { time: '17:00', duration: 45, title: 'Ăn tối', icon: '🍲', description: 'Bữa tối nhẹ nhàng, cân bằng dinh dưỡng.' },
-            { time: '17:45', duration: 75, title: 'Phụ giúp việc nhà', icon: '🍳', description: 'Phụ giúp ba mẹ các công việc nhà phù hợp và chuẩn bị bữa ăn.' },
-            { time: '19:00', duration: 60, title: 'Trò chuyện & Hoạt động gia đình', icon: '👨‍👩‍👧‍👦', description: 'Xem phim, chơi board game, hoặc trò chuyện về một ngày đã qua.' },
-            { time: '20:00', duration: 30, title: 'Tắm rửa & Vệ sinh', icon: '🛁', description: 'Vệ sinh cá nhân, chuẩn bị đi ngủ.' },
-            { time: '20:30', duration: 60, title: 'Đọc sách', icon: '📖', description: 'Đọc truyện thiếu nhi hoặc sách khoa học đơn giản.' },
-            { time: '21:30', duration: 0, title: 'Đi ngủ', icon: '🌙', description: 'Chúc ngủ ngon!' }
+            { time: '12:30', duration: 60, title: 'Nghỉ trưa', icon: '😴', description: 'Đọc sách khoa học, truyện ngắn để thư giãn.' },
+            { time: '13:30', duration: 90, title: 'Học Anh văn', icon: '🇬🇧', description: 'Luyện nghe, nói, đọc, viết. Sử dụng Duolingo, BBC Learning English.' },
+            { time: '15:00', duration: 15, title: 'Nghỉ ngơi', icon: '🧘', description: 'Vận động nhẹ, giải lao giữa giờ.' },
+            { time: '15:15', duration: 90, title: 'Học Toán', icon: '📐', description: 'Giải bài tập, học lý thuyết, hoặc chơi game toán học.', link: 'https://mathx.vn' },
+            { time: '16:45', duration: 45, title: 'Dự án cá nhân / Sáng tạo', icon: '💡', description: 'Vẽ, nặn đất sét, viết truyện ngắn, hoặc làm một dự án khoa học nhỏ.' },
+            { time: '17:30', duration: 45, title: 'Ăn tối', icon: '🍲', description: 'Bữa tối nhẹ nhàng, cân bằng dinh dưỡng.' },
+            { time: '18:15', duration: 75, title: 'Phụ giúp việc nhà', icon: '🍳', description: 'Phụ giúp ba mẹ các công việc nhà phù hợp và chuẩn bị bữa ăn.' },
+            { time: '19:30', duration: 60, title: 'Trò chuyện & Hoạt động gia đình', icon: '👨‍👩‍👧‍👦', description: 'Xem phim, chơi board game, hoặc trò chuyện về một ngày đã qua.' },
+            { time: '20:30', duration: 30, title: 'Tắm rửa & Vệ sinh', icon: '🛁', description: 'Vệ sinh cá nhân, chuẩn bị đi ngủ.' },
+            { time: '21:00', duration: 60, title: 'Đọc sách', icon: '📖', description: 'Đọc truyện thiếu nhi hoặc sách khoa học đơn giản.' },
+            { time: '22:00', duration: 0, title: 'Đi ngủ', icon: '🌙', description: 'Chúc ngủ ngon!' }
         ];
         
         const dayMappings = {
@@ -270,20 +270,30 @@
                     daySchedule.push({ time: '21:00', duration: 60, title: 'Học Tiếng Anh (Pony)', icon: '🐴', description: 'Lớp học Tiếng Anh trực tuyến.' });
                     daySchedule.push({ time: '22:00', duration: 0, title: 'Đi ngủ', icon: '🌙', description: 'Chúc ngủ ngon!' });
                 }
+                else if (day === 'wednesday') {
+                    daySchedule = [
+                        ...baseDaySchedule.filter(task => timeToMinutes(task.time) < timeToMinutes('17:30')), // Keep schedule until dinner
+                        { time: '17:30', duration: 45, title: 'Ăn tối', icon: '🍲', description: 'Bữa tối nhẹ nhàng, cân bằng dinh dưỡng.' },
+                        { time: '18:15', duration: 15, title: 'Chuẩn bị lớp học', icon: '🎒', description: 'Chuẩn bị sách vở, máy tính cho buổi học livestream.' },
+                        { time: '18:30', duration: 90, title: 'Học Livestream Toán (MathX)', icon: '🖥️', description: 'Lớp học livestream Toán trên MathX.', link: 'https://mathx.vn' },
+                        { time: '20:00', duration: 30, title: 'Thư giãn sau giờ học', icon: '🧘', description: 'Nghỉ ngơi, uống nước sau buổi học.' },
+                        ...baseDaySchedule.filter(task => timeToMinutes(task.time) >= timeToMinutes('20:30')) // Keep late evening schedule
+                    ];
+                }
                 else if (day === 'friday') {
                     // Rebuild Friday's schedule logically
                     daySchedule = [
                         ...baseDaySchedule.filter(task => timeToMinutes(task.time) < timeToMinutes('09:45')), // Morning routine until 9:45
-                        { time: '09:45', duration: 90, title: 'Học Toán', icon: '📐', description: 'Giải bài tập, học lý thuyết, hoặc chơi game toán học.' },
+                        { time: '09:45', duration: 90, title: 'Học Toán', icon: '📐', description: 'Giải bài tập, học lý thuyết, hoặc chơi game toán học.', link: 'https://mathx.vn' },
                         { time: '11:15', duration: 30, title: 'Ôn bài / Đọc sách', icon: '📚', description: 'Ôn lại bài toán vừa học hoặc đọc sách tự do.' },
-                        ...baseDaySchedule.filter(task => timeToMinutes(task.time) >= timeToMinutes('11:45') && timeToMinutes(task.time) < timeToMinutes('13:00')), // Lunch and break
-                        { time: '13:00', duration: 180, title: 'Dự án cá nhân / Sáng tạo', icon: '💡', description: 'Thời gian tự do để vẽ, viết, làm mô hình hoặc các dự án yêu thích.' },
+                        ...baseDaySchedule.filter(task => timeToMinutes(task.time) >= timeToMinutes('11:45') && timeToMinutes(task.time) < timeToMinutes('13:30')), // Lunch and new 1h break
+                        { time: '13:30', duration: 150, title: 'Dự án cá nhân / Sáng tạo', icon: '💡', description: 'Thời gian tự do để vẽ, viết, làm mô hình hoặc các dự án yêu thích.' },
                         { time: '16:00', duration: 60, title: 'Phụ giúp việc nhà', icon: '🍳', description: 'Phụ giúp ba mẹ dọn dẹp và chuẩn bị bữa tối.' },
-                        ...baseDaySchedule.filter(task => timeToMinutes(task.time) >= timeToMinutes('17:00') && timeToMinutes(task.time) < timeToMinutes('17:45')), // Dinner
+                        { time: '17:00', duration: 45, title: 'Ăn tối', icon: '🍲', description: 'Bữa tối nhẹ nhàng, cân bằng dinh dưỡng.' },
                         { time: '17:45', duration: 15, title: 'Chuẩn bị đi học', icon: '🎒', description: 'Chuẩn bị sách vở, di chuyển đến lớp Teky.' },
                         { time: '18:00', duration: 120, title: 'Học Robotics (Teky)', icon: '⚙️', description: 'Lớp học Robotics tại trung tâm Teky.' },
                         { time: '20:00', duration: 60, title: 'Thư giãn / Ăn nhẹ', icon: '🍎', description: 'Nghỉ ngơi sau lớp Teky, ăn nhẹ và chuẩn bị lớp Pony.' },
-                        { time: '21:00', duration: 60, title: 'Học Tiếng Anh (Pony)', icon: '🐴', description: 'Lớp học Tiếng Anh trực tuyến.' },
+                        { time: '21:00', duration: 60, title: 'Học Tiếng Anh (Pony)', icon: '�', description: 'Lớp học Tiếng Anh trực tuyến.' },
                         { time: '22:00', duration: 0, title: 'Đi ngủ', icon: '🌙', description: 'Chúc ngủ ngon!' }
                     ];
                 }
@@ -296,7 +306,13 @@
                         { time: '12:30', duration: 90, title: 'Nghỉ trưa / Đọc sách', icon: '😴', description: 'Nghỉ ngơi hoặc đọc các loại sách yêu thích.' },
                         { time: '14:00', duration: 90, title: 'Dự án cuối tuần', icon: '🚀', description: 'Xây mô hình LEGO, làm video ngắn, hoặc thực hành thí nghiệm khoa học vui.' },
                         { time: '15:30', duration: 90, title: 'Thời gian chơi tự do', icon: '🎲', description: 'Chơi cùng bạn bè, gia đình hoặc các trò chơi yêu thích.' },
-                        ...baseDaySchedule.filter(task => timeToMinutes(task.time) >= timeToMinutes('17:00'))
+                        // Use original evening schedule for weekends, not the pushed-back one
+                        { time: '17:00', duration: 45, title: 'Ăn tối', icon: '🍲', description: 'Bữa tối nhẹ nhàng, cân bằng dinh dưỡng.' },
+                        { time: '17:45', duration: 75, title: 'Phụ giúp việc nhà', icon: '🍳', description: 'Phụ giúp ba mẹ các công việc nhà phù hợp và chuẩn bị bữa ăn.' },
+                        { time: '19:00', duration: 60, title: 'Trò chuyện & Hoạt động gia đình', icon: '👨‍👩‍👧‍👦', description: 'Xem phim, chơi board game, hoặc trò chuyện về một ngày đã qua.' },
+                        { time: '20:00', duration: 30, title: 'Tắm rửa & Vệ sinh', icon: '🛁', description: 'Vệ sinh cá nhân, chuẩn bị đi ngủ.' },
+                        { time: '20:30', duration: 60, title: 'Đọc sách', icon: '📖', description: 'Đọc truyện thiếu nhi hoặc sách khoa học đơn giản.' },
+                        { time: '21:30', duration: 0, title: 'Đi ngủ', icon: '🌙', description: 'Chúc ngủ ngon!' }
                     ];
                 }
                 weeklyScheduleData[day] = sortTasksByTime(daySchedule.map(task => ({ ...task, completed: false })));
@@ -455,3 +471,4 @@
     </script>
 </body>
 </html>
+�
