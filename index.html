@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch Trình Tương Tác Hàng Tuần</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #334155; /* slate-700 */
+        }
+        
+        /* --- Day Selector --- */
+        .day-selector-btn {
+            transition: all 0.2s ease-in-out;
+            border: 1px solid #e2e8f0; /* slate-200 */
+        }
+        .day-selector-btn:hover {
+            background-color: #f1f5f9; /* slate-100 */
+            border-color: #94a3b8; /* slate-400 */
+        }
+        .day-selector-btn.active {
+            background-color: #38bdf8; /* sky-400 */
+            color: white;
+            font-weight: 700;
+            border-color: #38bdf8;
+            box-shadow: 0 4px 14px 0 rgba(56, 189, 248, 0.39);
+        }
+
+        /* --- Progress Bar --- */
+        .progress-container {
+            background-color: white;
+            padding: 1rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+        }
+        .progress-bar-bg {
+             background-color: #e0f2f1; /* teal-50 */
+        }
+        .progress-bar-fill {
+            background: linear-gradient(to right, #2dd4bf, #38bdf8); /* teal-400 to sky-400 */
+            transition: width 0.5s ease-in-out;
+        }
+
+        /* --- Timeline --- */
+        #timeline-wrapper {
+            position: relative;
+            padding: 2rem 0;
+        }
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: #e2e8f0; /* slate-200 */
+            border-radius: 2px;
+        }
+        .timeline-item {
+            position: relative;
+            width: 50%;
+            padding: 0 2rem;
+            margin-bottom: 2rem;
+        }
+        .timeline-item:nth-child(odd) {
+            align-self: flex-start;
+            padding-right: 3rem;
+        }
+        .timeline-item:nth-child(even) {
+            align-self: flex-end;
+            padding-left: 3rem;
+        }
+        
+        /* Timeline Dot */
+        .timeline-dot {
+            position: absolute;
+            top: 0.5rem;
+            width: 16px;
+            height: 16px;
+            background-color: white;
+            border: 3px solid #38bdf8; /* sky-400 */
+            border-radius: 50%;
+            z-index: 2;
+        }
+        .timeline-item:nth-child(odd) .timeline-dot {
+            right: -8px;
+            transform: translateX(50%);
+        }
+        .timeline-item:nth-child(even) .timeline-dot {
+            left: -8px;
+            transform: translateX(-50%);
+        }
+
+        /* Task Card */
+        .task-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.07);
+        }
+        .task-card.completed {
+            opacity: 0.6;
+        }
+        .task-card.completed .task-title {
+            text-decoration: line-through;
+            text-decoration-color: #94a3b8; /* slate-400 */
+        }
+        .task-card.current {
+            border: 2px solid #38bdf8;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+        }
+        
+        /* Time Indicator */
+        #time-indicator {
+            position: absolute;
+            left: 50%;
+            width: 100px;
+            height: 2px;
+            background-color: #f43f5e; /* rose-500 */
+            z-index: 3;
+            transition: top 1s linear;
+            display: none;
+        }
+        #time-indicator::before {
+            content: attr(data-time);
+            position: absolute;
+            left: -50px;
+            top: -12px;
+            background-color: #f43f5e;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        /* Custom Checkbox */
+        .custom-checkbox {
+            -webkit-appearance: none; appearance: none;
+            width: 1.75rem; height: 1.75rem;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .custom-checkbox:hover {
+            border-color: #38bdf8;
+        }
+        .custom-checkbox:checked {
+            background-color: #2dd4bf;
+            border-color: #2dd4bf;
+        }
+        .custom-checkbox:checked::after {
+            content: '✔';
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-5xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-800">Lịch Trình Hàng Tuần</h1>
+            <p class="text-slate-500 mt-2">Chọn một ngày để xem lịch trình chi tiết.</p>
+        </header>
+
+        <div id="day-selector" class="flex flex-wrap justify-center gap-2 mb-8"></div>
+
+        <div class="progress-container mb-8">
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-lg font-semibold text-slate-700">Tiến độ trong ngày</h2>
+                <p id="progress-summary" class="font-medium text-slate-500 text-sm"></p>
+            </div>
+            <div class="w-full bg-slate-200 rounded-full h-5">
+                <div id="progress-bar" class="progress-bar-fill h-5 rounded-full flex items-center justify-center">
+                    <span id="progress-text" class="font-bold text-white text-xs"></span>
+                </div>
+            </div>
+        </div>
+
+        <div id="timeline-wrapper">
+            <div class="timeline-line"></div>
+            <div id="time-indicator"></div>
+            <div id="schedule-container" class="flex flex-col">
+                 <!-- Timeline items will be injected here -->
+            </div>
+        </div>
+
+        <footer class="text-center mt-12 text-slate-500 text-sm">
+            <p>Chúc các con có một tuần thật vui và bổ ích!</p>
+            <p>&copy; 2024 - Tạo bởi Gemini</p>
+        </footer>
+    </div>
+
+    <script>
+        const baseDaySchedule = [
+            { time: '07:30', duration: 30, title: 'Thức dậy & Vệ sinh cá nhân', icon: '☀️', description: 'Vệ sinh cá nhân, thay quần áo, và chuẩn bị cho một ngày mới.' },
+            { time: '08:00', duration: 30, title: 'Ăn sáng', icon: '🥞', description: 'Bữa sáng nhẹ như bánh mì, trứng, sữa hoặc cháo.' },
+            { time: '08:30', duration: 60, title: 'Tập thể dục', icon: '🏃‍♂️', description: 'Mục tiêu: Đạt 4000 bước. Dùng đồng hồ XiaoMi/Huawei để đo.' },
+            { time: '09:30', duration: 15, title: 'Nghỉ ngơi', icon: '💧', description: 'Uống nước, thư giãn, chuẩn bị cho giờ học.' },
+            { time: '09:45', duration: 120, title: 'Học Robotics', icon: '🤖', description: 'Làm bài tập lập trình, lắp ráp mô hình, hoặc học lý thuyết.', link: 'https://phanminhnhat.github.io/AIRobotics4Juniors' },
+            { time: '11:45', duration: 45, title: 'Ăn trưa', icon: '🍱', description: 'Cơm, thịt/cá, rau, trái cây để bổ sung năng lượng.' },
+            { time: '12:30', duration: 30, title: 'Nghỉ trưa', icon: '😴', description: 'Đọc sách khoa học, truyện ngắn để thư giãn.' },
+            { time: '13:00', duration: 90, title: 'Học Anh văn', icon: '🇬🇧', description: 'Luyện nghe, nói, đọc, viết. Sử dụng Duolingo, BBC Learning English.' },
+            { time: '14:30', duration: 15, title: 'Nghỉ ngơi', icon: '🧘', description: 'Vận động nhẹ, giải lao giữa giờ.' },
+            { time: '14:45', duration: 90, title: 'Học Toán', icon: '📐', description: 'Giải bài tập, học lý thuyết, hoặc chơi game toán học.' },
+            { time: '16:15', duration: 45, title: 'Dự án cá nhân / Sáng tạo', icon: '💡', description: 'Vẽ, nặn đất sét, viết truyện ngắn, hoặc làm một dự án khoa học nhỏ.' },
+            { time: '17:00', duration: 45, title: 'Ăn tối', icon: '🍲', description: 'Bữa tối nhẹ nhàng, cân bằng dinh dưỡng.' },
+            { time: '17:45', duration: 75, title: 'Phụ giúp việc nhà', icon: '🍳', description: 'Phụ giúp ba mẹ các công việc nhà phù hợp và chuẩn bị bữa ăn.' },
+            { time: '19:00', duration: 60, title: 'Trò chuyện & Hoạt động gia đình', icon: '👨‍👩‍👧‍👦', description: 'Xem phim, chơi board game, hoặc trò chuyện về một ngày đã qua.' },
+            { time: '20:00', duration: 30, title: 'Tắm rửa & Vệ sinh', icon: '🛁', description: 'Vệ sinh cá nhân, chuẩn bị đi ngủ.' },
+            { time: '20:30', duration: 60, title: 'Đọc sách', icon: '📖', description: 'Đọc truyện thiếu nhi hoặc sách khoa học đơn giản.' },
+            { time: '21:30', duration: 0, title: 'Đi ngủ', icon: '🌙', description: 'Chúc ngủ ngon!' }
+        ];
+        
+        const dayMappings = {
+            sunday: { name: 'Chủ Nhật', index: 0 },
+            monday: { name: 'Thứ Hai', index: 1 },
+            tuesday: { name: 'Thứ Ba', index: 2 },
+            wednesday: { name: 'Thứ Tư', index: 3 },
+            thursday: { name: 'Thứ Năm', index: 4 },
+            friday: { name: 'Thứ Sáu', index: 5 },
+            saturday: { name: 'Thứ Bảy', index: 6 },
+        };
+        
+        let weeklyScheduleData = {};
+        let currentDayKey = 'monday';
+
+        function timeToMinutes(timeStr) {
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            return hours * 60 + minutes;
+        }
+        
+        function formatDuration(minutes) {
+            if (!minutes || minutes <= 0) return '';
+            const h = Math.floor(minutes / 60);
+            const m = minutes % 60;
+            if (h > 0 && m > 0) return `${h}h ${m}m`;
+            if (h > 0) return `${h}h`;
+            return `${m}m`;
+        }
+
+        function sortTasksByTime(tasks) {
+            return tasks.sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
+        }
+
+        function generateWeeklySchedule() {
+            const weekDays = Object.keys(dayMappings);
+            weekDays.forEach(day => {
+                let daySchedule = JSON.parse(JSON.stringify(baseDaySchedule));
+                if (day === 'tuesday') {
+                    daySchedule = daySchedule.filter(task => task.title !== 'Học Anh văn' && !['Đọc sách', 'Đi ngủ'].includes(task.title));
+                    daySchedule.push({ time: '20:00', duration: 60, title: 'Ôn bài nhẹ nhàng', icon: '📝', description: 'Xem lại bài học trong ngày, chuẩn bị cho lớp Tiếng Anh.' });
+                    daySchedule.push({ time: '21:00', duration: 60, title: 'Học Tiếng Anh (Pony)', icon: '🐴', description: 'Lớp học Tiếng Anh trực tuyến.' });
+                    daySchedule.push({ time: '22:00', duration: 0, title: 'Đi ngủ', icon: '🌙', description: 'Chúc ngủ ngon!' });
+                }
+                else if (day === 'friday') {
+                    // Rebuild Friday's schedule logically
+                    daySchedule = [
+                        ...baseDaySchedule.filter(task => timeToMinutes(task.time) < timeToMinutes('09:45')), // Morning routine until 9:45
+                        { time: '09:45', duration: 90, title: 'Học Toán', icon: '📐', description: 'Giải bài tập, học lý thuyết, hoặc chơi game toán học.' },
+                        { time: '11:15', duration: 30, title: 'Ôn bài / Đọc sách', icon: '📚', description: 'Ôn lại bài toán vừa học hoặc đọc sách tự do.' },
+                        ...baseDaySchedule.filter(task => timeToMinutes(task.time) >= timeToMinutes('11:45') && timeToMinutes(task.time) < timeToMinutes('13:00')), // Lunch and break
+                        { time: '13:00', duration: 180, title: 'Dự án cá nhân / Sáng tạo', icon: '💡', description: 'Thời gian tự do để vẽ, viết, làm mô hình hoặc các dự án yêu thích.' },
+                        { time: '16:00', duration: 60, title: 'Phụ giúp việc nhà', icon: '🍳', description: 'Phụ giúp ba mẹ dọn dẹp và chuẩn bị bữa tối.' },
+                        ...baseDaySchedule.filter(task => timeToMinutes(task.time) >= timeToMinutes('17:00') && timeToMinutes(task.time) < timeToMinutes('17:45')), // Dinner
+                        { time: '17:45', duration: 15, title: 'Chuẩn bị đi học', icon: '🎒', description: 'Chuẩn bị sách vở, di chuyển đến lớp Teky.' },
+                        { time: '18:00', duration: 120, title: 'Học Robotics (Teky)', icon: '⚙️', description: 'Lớp học Robotics tại trung tâm Teky.' },
+                        { time: '20:00', duration: 60, title: 'Thư giãn / Ăn nhẹ', icon: '🍎', description: 'Nghỉ ngơi sau lớp Teky, ăn nhẹ và chuẩn bị lớp Pony.' },
+                        { time: '21:00', duration: 60, title: 'Học Tiếng Anh (Pony)', icon: '🐴', description: 'Lớp học Tiếng Anh trực tuyến.' },
+                        { time: '22:00', duration: 0, title: 'Đi ngủ', icon: '🌙', description: 'Chúc ngủ ngon!' }
+                    ];
+                }
+                else if (day === 'saturday' || day === 'sunday') {
+                    daySchedule = [
+                        { time: '07:30', duration: 30, title: 'Thức dậy & Vệ sinh cá nhân', icon: '☀️', description: 'Vệ sinh cá nhân, thay quần áo.' },
+                        { time: '08:00', duration: 60, title: 'Ăn sáng & Chuẩn bị', icon: '🥞', description: 'Ăn sáng và chuẩn bị đồ đi chơi thể thao.' },
+                        { time: '09:00', duration: 150, title: 'Chơi Cầu Lông', icon: '🏸', description: 'Hoạt động thể thao cuối tuần.' },
+                        { time: '11:30', duration: 60, title: 'Nghỉ ngơi & Ăn trưa', icon: '🍱', description: 'Nghỉ ngơi sau khi chơi thể thao và ăn trưa.' },
+                        { time: '12:30', duration: 90, title: 'Nghỉ trưa / Đọc sách', icon: '😴', description: 'Nghỉ ngơi hoặc đọc các loại sách yêu thích.' },
+                        { time: '14:00', duration: 90, title: 'Dự án cuối tuần', icon: '🚀', description: 'Xây mô hình LEGO, làm video ngắn, hoặc thực hành thí nghiệm khoa học vui.' },
+                        { time: '15:30', duration: 90, title: 'Thời gian chơi tự do', icon: '🎲', description: 'Chơi cùng bạn bè, gia đình hoặc các trò chơi yêu thích.' },
+                        ...baseDaySchedule.filter(task => timeToMinutes(task.time) >= timeToMinutes('17:00'))
+                    ];
+                }
+                weeklyScheduleData[day] = sortTasksByTime(daySchedule.map(task => ({ ...task, completed: false })));
+            });
+        }
+
+        function renderSchedule(dayKey) {
+            const container = document.getElementById('schedule-container');
+            const tasks = weeklyScheduleData[dayKey] || [];
+            container.innerHTML = ''; // Clear previous items
+
+            tasks.forEach((task, index) => {
+                const itemWrapper = document.createElement('div');
+                itemWrapper.className = 'timeline-item flex';
+                const durationText = formatDuration(task.duration);
+
+                itemWrapper.innerHTML = `
+                    <div class="timeline-dot"></div>
+                    <div class="task-card p-4 flex-1" data-index="${index}" data-start-time="${task.time}" data-duration="${task.duration}">
+                        <div class="flex items-start space-x-4">
+                            <div class="text-3xl mt-1">${task.icon}</div>
+                            <div class="flex-1">
+                                <div class="flex items-baseline space-x-2">
+                                    <p class="font-bold text-sky-500">${task.time}</p>
+                                    ${durationText ? `<p class="text-xs text-slate-400 font-medium">(${durationText})</p>` : ''}
+                                </div>
+                                <h3 class="font-bold text-lg text-slate-800 task-title">${task.title}</h3>
+                                <p class="text-slate-600 text-sm mt-1">${task.description}</p>
+                                ${task.link ? `<a href="${task.link}" target="_blank" class="text-blue-500 hover:underline text-sm block mt-2 font-medium">Truy cập link học</a>` : ''}
+                            </div>
+                            <input type="checkbox" id="task-${dayKey}-${index}" class="custom-checkbox flex-shrink-0" ${task.completed ? 'checked' : ''}>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(itemWrapper);
+            });
+
+            addCheckboxListeners(dayKey);
+            updateProgressBar(dayKey);
+            updateTimeIndicator();
+        }
+
+        function addCheckboxListeners(dayKey) {
+            document.querySelectorAll('.custom-checkbox').forEach((checkbox, index) => {
+                checkbox.addEventListener('change', () => {
+                    weeklyScheduleData[dayKey][index].completed = checkbox.checked;
+                    const card = checkbox.closest('.task-card');
+                    card.classList.toggle('completed', checkbox.checked);
+                    updateProgressBar(dayKey);
+                });
+            });
+        }
+
+        function updateProgressBar(dayKey) {
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const progressSummary = document.getElementById('progress-summary');
+            const tasks = weeklyScheduleData[dayKey] || [];
+            
+            if (tasks.length === 0) {
+                progressBar.style.width = '0%';
+                progressText.textContent = '';
+                progressSummary.textContent = 'Không có hoạt động nào.';
+                return;
+            }
+
+            const completedTasks = tasks.filter(task => task.completed).length;
+            const percentage = Math.round((completedTasks / tasks.length) * 100);
+            
+            progressBar.style.width = `${percentage}%`;
+            progressText.textContent = `${percentage}%`;
+            progressSummary.textContent = `Đã hoàn thành: ${completedTasks} / ${tasks.length} hoạt động`;
+        }
+
+        function updateTimeIndicator() {
+            const timeIndicator = document.getElementById('time-indicator');
+            const timelineWrapper = document.getElementById('timeline-wrapper');
+            const now = new Date();
+            const todayKey = Object.keys(dayMappings).find(key => dayMappings[key].index === now.getDay());
+            
+            if (todayKey !== currentDayKey) {
+                timeIndicator.style.display = 'none';
+                document.querySelectorAll('.task-card.current').forEach(c => c.classList.remove('current'));
+                return;
+            }
+
+            const tasks = weeklyScheduleData[todayKey] || [];
+            if (tasks.length < 2) return;
+
+            const nowInMinutes = now.getHours() * 60 + now.getMinutes();
+            const firstTaskStart = timeToMinutes(tasks[0].time);
+            const lastTask = tasks[tasks.length - 1];
+            const lastTaskEnd = timeToMinutes(lastTask.time) + (lastTask.duration || 0);
+
+            if (nowInMinutes < firstTaskStart || nowInMinutes > lastTaskEnd) {
+                timeIndicator.style.display = 'none';
+                return;
+            }
+            
+            timeIndicator.style.display = 'block';
+            timeIndicator.dataset.time = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+            
+            const totalDayDuration = lastTaskEnd - firstTaskStart;
+            const elapsedSinceFirstTask = nowInMinutes - firstTaskStart;
+            const percentageThroughDay = elapsedSinceFirstTask / totalDayDuration;
+            
+            const timelineHeight = timelineWrapper.querySelector('.timeline-line').offsetHeight;
+            timeIndicator.style.top = `${percentageThroughDay * timelineHeight}px`;
+
+            // Highlight current task
+            document.querySelectorAll('.task-card.current').forEach(c => c.classList.remove('current'));
+            const cards = document.querySelectorAll('.task-card');
+            for (const card of cards) {
+                const cardStartTime = timeToMinutes(card.dataset.startTime);
+                const cardDuration = parseInt(card.dataset.duration, 10);
+                if (nowInMinutes >= cardStartTime && nowInMinutes < cardStartTime + cardDuration) {
+                    card.classList.add('current');
+                    break;
+                }
+            }
+        }
+
+        function setupDaySelector() {
+            const selectorContainer = document.getElementById('day-selector');
+            const weekOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            
+            weekOrder.forEach(dayKey => {
+                const button = document.createElement('button');
+                button.textContent = dayMappings[dayKey].name;
+                button.dataset.day = dayKey;
+                button.className = 'day-selector-btn px-3 py-2 rounded-lg text-slate-700 font-medium text-sm sm:px-4 sm:text-base';
+                selectorContainer.appendChild(button);
+                button.addEventListener('click', () => {
+                    currentDayKey = dayKey;
+                    document.querySelectorAll('.day-selector-btn').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    renderSchedule(dayKey);
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            generateWeeklySchedule();
+            setupDaySelector();
+
+            const now = new Date();
+            const todayKey = Object.keys(dayMappings).find(key => dayMappings[key].index === now.getDay()) || 'monday';
+            currentDayKey = todayKey;
+
+            document.querySelector(`.day-selector-btn[data-day='${currentDayKey}']`).classList.add('active');
+            renderSchedule(currentDayKey);
+            
+            setInterval(updateTimeIndicator, 30000);
+            window.addEventListener('resize', updateTimeIndicator);
+        });
+    </script>
+</body>
+</html>
